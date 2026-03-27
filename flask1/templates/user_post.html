@@ -1,0 +1,39 @@
+{% extends "inherit.html" %}
+
+	{% block content %}
+		<h1 class="mb-3"> Posts by {{ user.username }} are ({{ post.total }})</h1>
+		{% for i in post %}
+        		<article class="media content-section">
+			<img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/'+i.author.image_file) }}">
+          		   <div class="media-body">
+            		    <div class="article-metadata">
+              		       <a class="mr-2" href="{{ url_for("users.user_posts", username=i.author.username) }}">{{ i.author.username }}</a>
+              		         <small class="text-muted">{{ i.date_posted.strftime("%Y-%m-%d") }}</small>
+            		    </div>
+            		       <h2><a class="article-title" href="{{ url_for("posts.post", post_id=i.id) }}">{{ i.title }}</a></h2>
+            		       <p class="article-content">{{ i.content }}</p>
+          		   </div>
+        		</article>
+    		{% endfor %}
+	<nav>
+	    <ul class="pagination justify-content-center">
+		{% for page_num in post.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+		    {% if page_num %}
+			{% if post.page==page_num %}
+				<li class=page-item>
+				  <a class="btn btn-info mr-1" href="{{ url_for("users.user_posts", username=user.username, page=page_num) }}">{{ page_num }}</a>
+				</li>
+			{% else %}
+			   <li class=page-item>
+				<a class="page-link mr-1" href="{{ url_for("users.user_posts",  username=user.username, page=page_num) }}">{{ page_num }}</a>
+			   </li>
+			{% endif %}
+		    {% else %}
+			<li class="page-item disabled">
+			   <span class="page-link">...</span>
+			</li>
+		    {% endif %}
+		{% endfor %}
+	   </ul>
+	</nav>
+	{% endblock content %}

@@ -1,0 +1,12 @@
+{% extends "inherit.html" %}
+	{% block content %}
+		{% for i in DEVELOPER %}
+			<h1>{{i.title}}</h1>
+			<p>by <a href="https://www.linkedin.com/in/tarak-suravarapu-71119a22b">{{ i.author }}</a> posted on {{ i.date }}</p>
+			<p>{{ i.content }}</p>
+		{% endfor %}
+		<!-- <div>
+			<a href={{ url_for("main.home") }}> home page </a>
+		     </div> -->
+	{% endblock content %}
+	
