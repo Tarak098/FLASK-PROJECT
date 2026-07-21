@@ -72,8 +72,13 @@ def get_image_base64_url(image_name):
         ext = "jpeg"
     return f"data:image/{ext};base64,{encoded}"
 
+# Helper: Render HTML without markdown block issues
+def render_html(html_str):
+    cleaned = "".join([line.strip() for line in html_str.split("\n")])
+    render_html(cleaned)
+
 # Inject custom CSS to match the original Flask application styles exactly
-st.markdown("""
+render_html("""
 <style>
 /* Hide standard Streamlit header, footer, and default sidebars */
 #MainMenu {visibility: hidden;}
@@ -190,7 +195,7 @@ button[kind="secondaryFormSubmit"], button[kind="primaryFormSubmit"], button[kin
     border-radius: 3px !important;
 }
 </style>
-""", unsafe_allow_html=True)
+""")
 
 # Initialize Session State
 if 'logged_in' not in st.session_state:
@@ -238,7 +243,7 @@ else:
     <a href="?page=register" target="_self">Register</a>
     """
 
-st.markdown(f"""
+render_html(f"""
 <div class="navbar-custom">
     <div class="nav-links-left">
         {left_links}
@@ -247,14 +252,14 @@ st.markdown(f"""
         {right_links}
     </div>
 </div>
-""", unsafe_allow_html=True)
+""")
 
 # --- TWO-COLUMN LAYOUT ---
 col_main, col_side = st.columns([8, 4])
 
 # SIDEBAR (RIGHT COLUMN)
 with col_side:
-    st.markdown("""
+    render_html("""
     <div class="content-section">
         <h3 style="color: #444444; margin-top: 0; font-size: 1.5rem; font-weight: 500;">Our Sidebar</h3>
         <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 15px;">You can put any information here you'd like.</p>
@@ -265,7 +270,7 @@ with col_side:
             <li style="padding: 10px 15px; background-color: #ffffff; border: 1px solid #dddddd; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; font-size: 0.9rem; color: #495057;">etc</li>
         </ul>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
 # MAIN CONTENT (LEFT COLUMN)
 with col_main:
@@ -318,7 +323,7 @@ with col_main:
                     </div>
                 </div>
                 """
-                st.markdown(post_html, unsafe_allow_html=True)
+                render_html(post_html)
                 
                 # Edit/Delete buttons if logged in and author
                 if st.session_state['logged_in'] and st.session_state['user_id'] == author_id:
@@ -356,7 +361,7 @@ with col_main:
 
     # --- VIEW: ABOUT ---
     elif current_page == "about":
-        st.markdown("""
+        render_html("""
         <div class="content-section">
             <h1 style="border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px;">About</h1>
             <h2 style="color: #444444; font-weight: 500;">tarak suravarapu</h2>
@@ -364,11 +369,11 @@ with col_main:
             <p style="color: #333333; margin-top: 15px; font-size: 1.1rem;">Developer of this website</p>
             <small style="color: #999999;">December 21, 2024</small>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     # --- VIEW: LOGIN ---
     elif current_page == "login":
-        st.markdown('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Log In</h2>', unsafe_allow_html=True)
+        render_html('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Log In</h2>')
         with st.form("login_form"):
             email = st.text_input("Email")
             password = st.text_input("Password", type="password")
@@ -393,7 +398,7 @@ with col_main:
                     st.rerun()
                 else:
                     st.error("Login unsuccessful. Please check email and password.")
-        st.markdown("""
+        render_html("""
         <div style="margin-top: 15px; font-size: 0.9rem;">
             <a href="?page=reset_request" target="_self" style="color: #007bff; text-decoration: none;">Forgot Password?</a>
         </div>
@@ -402,11 +407,11 @@ with col_main:
             Need An Account? <a href="?page=register" target="_self" style="color: #007bff; text-decoration: none; margin-left: 5px;">Sign Up</a>
         </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     # --- VIEW: REGISTER ---
     elif current_page == "register":
-        st.markdown('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Register</h2>', unsafe_allow_html=True)
+        render_html('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Register</h2>')
         with st.form("register_form"):
             username = st.text_input("Username")
             email = st.text_input("Email")
@@ -442,20 +447,20 @@ with col_main:
                             st.success("Account created successfully! You are now able to log in.")
                             st.query_params["page"] = "login"
                             st.rerun()
-        st.markdown("""
+        render_html("""
         <hr style="border-top: 1px solid #e3e3e3; margin: 20px 0;">
         <div style="font-size: 0.9rem; color: #6c757d;">
             Already Have An Account? <a href="?page=login" target="_self" style="color: #007bff; text-decoration: none; margin-left: 5px;">Sign In</a>
         </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     # --- VIEW: ACCOUNT ---
     elif current_page == "account":
         if not st.session_state['logged_in']:
             st.warning("Please log in to view this page.")
         else:
-            st.markdown('<div class="content-section">', unsafe_allow_html=True)
+            render_html('<div class="content-section">')
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
             cursor.execute("SELECT username, email, image_file FROM user WHERE id = ?", (st.session_state['user_id'],))
@@ -465,7 +470,7 @@ with col_main:
             db_username, db_email, db_image_file = user_info
             avatar_url = get_image_base64_url(db_image_file)
             
-            st.markdown(f"""
+            render_html(f"""
             <div style="display: flex; align-items: center; margin-bottom: 30px;">
                 <img src="{avatar_url}" style="width: 125px; height: 125px; border-radius: 50%; margin-right: 20px;">
                 <div>
@@ -474,7 +479,7 @@ with col_main:
                 </div>
             </div>
             <h3 style="border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Account Info</h3>
-            """, unsafe_allow_html=True)
+            """)
             
             with st.form("account_form"):
                 new_username = st.text_input("Username", db_username)
@@ -522,14 +527,14 @@ with col_main:
                             
                             st.success("Your account has been updated!")
                             st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+            render_html("</div>")
 
     # --- VIEW: NEW POST ---
     elif current_page == "new_post":
         if not st.session_state['logged_in']:
             st.warning("Please log in to write posts.")
         else:
-            st.markdown('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">New Post</h2>', unsafe_allow_html=True)
+            render_html('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">New Post</h2>')
             with st.form("new_post_form"):
                 title = st.text_input("Title")
                 content = st.text_area("Content", height=200)
@@ -548,7 +553,7 @@ with col_main:
                         st.success("Your post has been created!")
                         st.query_params["page"] = "home"
                         st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+            render_html("</div>")
 
     # --- VIEW: EDIT POST ---
     elif current_page == "edit_post":
@@ -564,7 +569,7 @@ with col_main:
         elif post_info[2] != st.session_state['user_id']:
             st.error("You are not authorized to edit this post.")
         else:
-            st.markdown('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Update Post</h2>', unsafe_allow_html=True)
+            render_html('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Update Post</h2>')
             with st.form("edit_post_form"):
                 title = st.text_input("Title", post_info[0])
                 content = st.text_area("Content", post_info[1], height=200)
@@ -582,7 +587,7 @@ with col_main:
                         st.success("Post updated successfully!")
                         st.query_params["page"] = "home"
                         st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+            render_html("</div>")
 
     # --- VIEW: VIEW DETAILED POST ---
     elif current_page == "post":
@@ -623,7 +628,7 @@ with col_main:
                 </div>
             </div>
             """
-            st.markdown(post_html, unsafe_allow_html=True)
+            render_html(post_html)
             
             if st.session_state['logged_in'] and st.session_state['user_id'] == author_id:
                 btn_cols = st.columns([1.5, 1.5, 7])
@@ -676,7 +681,7 @@ with col_main:
             posts = cursor.fetchall()
             conn.close()
             
-            st.markdown(f"<h1 style='border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;'>Posts by {username_filter} ({total_posts})</h1>", unsafe_allow_html=True)
+            render_html(f"<h1 style='border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;'>Posts by {username_filter} ({total_posts})</h1>")
             
             if not posts:
                 st.info("No posts found for this user.")
@@ -704,7 +709,7 @@ with col_main:
                         </div>
                     </div>
                     """
-                    st.markdown(post_html, unsafe_allow_html=True)
+                    render_html(post_html)
                     
                     if st.session_state['logged_in'] and st.session_state['user_id'] == author_id:
                         btn_cols = st.columns([1.5, 1.5, 7])
@@ -741,7 +746,7 @@ with col_main:
 
     # --- VIEW: REQUEST RESET ---
     elif current_page == "reset_request":
-        st.markdown('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Reset Password</h2>', unsafe_allow_html=True)
+        render_html('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Reset Password</h2>')
         with st.form("reset_request_form"):
             reset_email = st.text_input("Email")
             submit = st.form_submit_button("Request Password Reset")
@@ -760,8 +765,8 @@ with col_main:
                     token = f"simulated_token_{user_info[0]}"
                     reset_link = f"?page=reset_password&token={token}&user_id={user_info[0]}"
                     st.info("Since email servers are not active on Streamlit Cloud without setup, here is your password reset link:")
-                    st.markdown(f'<a href="{reset_link}" target="_self" style="color: #007bff; font-weight: bold;">Reset Password Link</a>', unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+                    render_html(f'<a href="{reset_link}" target="_self" style="color: #007bff; font-weight: bold;">Reset Password Link</a>')
+        render_html("</div>")
 
     # --- VIEW: RESET PASSWORD ---
     elif current_page == "reset_password":
@@ -771,7 +776,7 @@ with col_main:
         if not token or not user_id:
             st.error("Invalid or expired password reset link.")
         else:
-            st.markdown('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Reset Password</h2>', unsafe_allow_html=True)
+            render_html('<div class="content-section"><h2 style="margin-top: 0; border-bottom: 1px solid #e3e3e3; padding-bottom: 10px; margin-bottom: 20px; font-weight: 500;">Reset Password</h2>')
             with st.form("reset_password_form"):
                 new_password = st.text_input("New Password", type="password")
                 confirm_new_password = st.text_input("Confirm New Password", type="password")
@@ -792,4 +797,4 @@ with col_main:
                         st.success("Your password has been updated! You are now able to log in.")
                         st.query_params["page"] = "login"
                         st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+            render_html("</div>")
