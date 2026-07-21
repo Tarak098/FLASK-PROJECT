@@ -59,7 +59,7 @@ def account():
         current_user.email=form.email.data
         db.session.commit()
         flash("your account has been updated!", "success")
-        redirect(url_for("users.account"))
+        return redirect(url_for("users.account"))
     elif request.method=="GET":
         form.username.data=current_user.username
         form.email.data=current_user.email
@@ -80,12 +80,14 @@ def user_posts(username):
 @users.route("/reset_password", methods=["GET", "POST"])
 def reset_request():
     if current_user.is_authenticated:
-        redirect(url_for("main.home"))
+        return redirect(url_for("main.home"))
     form=RequestResetForm()
     if form.validate_on_submit():
         user=User.query.filter_by(email=form.email.data).first()
-        send_reset_email(user)
-        flash("An email has been sent to you with instructions to reset your password", "info")
+        if send_reset_email(user):
+            flash("An email has been sent to you with instructions to reset your password", "info")
+        else:
+            flash("Unable to send password reset email. Please verify configuration or try again later.", "warning")
         return redirect(url_for("users.login"))
     return render_template("reset_request.html", title="Reset Request", form=form)
 
@@ -93,7 +95,7 @@ def reset_request():
 @users.route("/reset_password/<token>", methods=["GET","POST"])
 def reset_password(token):
     if current_user.is_authenticated:
-        redirect(url_for("main.home"))
+        return redirect(url_for("main.home"))
     user=User.verify_reset_token(token)
     if user is None:
         flash("That is an invalid or expired token.", "warning")

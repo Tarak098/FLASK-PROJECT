@@ -7,7 +7,7 @@ from flask_login import UserMixin
 
 @login_manager.user_loader
 def login_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 #creating a database this will ceate a database in our folder
 class User(db.Model, UserMixin):
@@ -29,7 +29,7 @@ class User(db.Model, UserMixin):
             user_id=s.loads(token, expires, salt='password-reset-salt')["user_id"]
         except:
             return None
-        return User.query.get(user_id)
+        return db.session.get(User, user_id)
 
 
     def __repr__(self):

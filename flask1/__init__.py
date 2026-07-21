@@ -38,4 +38,9 @@ def create_app(config_class=Config):
     app.register_blueprint(main)
     app.register_blueprint(errors)
 
+    # Initialize database tables if they do not exist
+    with app.app_context():
+        db.create_all()
+
     return app
+

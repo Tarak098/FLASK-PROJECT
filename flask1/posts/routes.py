@@ -38,7 +38,7 @@ def update_post(post_id):
         user_post.content=form.content.data
         db.session.commit()
         flash("post updated successfully", "success")
-        redirect(url_for("posts.post", post_id=user_post.id))
+        return redirect(url_for("posts.post", post_id=user_post.id))
     elif request.method == "GET":
         form.title.data=user_post.title
         form.content.data=user_post.content
