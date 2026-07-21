@@ -75,7 +75,7 @@ def get_image_base64_url(image_name):
 # Helper: Render HTML without markdown block issues
 def render_html(html_str):
     cleaned = "".join([line.strip() for line in html_str.split("\n")])
-    render_html(cleaned)
+    st.markdown(cleaned, unsafe_allow_html=True)
 
 # Inject custom CSS to match the original Flask application styles exactly
 render_html("""
