@@ -77,7 +77,21 @@ def render_html(html_str):
     cleaned = "".join([line.strip() for line in html_str.split("\n")])
     st.markdown(cleaned, unsafe_allow_html=True)
 
-# Inject custom CSS to match the original Flask application styles exactly
+# Inject Bootstrap CDNs (exactly as done in the inherit.html template)
+render_html("""
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+""")
+
+# Load and inject the user's custom stylesheet (main.css) directly
+try:
+    with open(os.path.join("flask1", "static", "main.css"), "r", encoding="utf-8") as f:
+        main_css_content = f.read()
+    render_html(f"<style>{main_css_content}</style>")
+except Exception as e:
+    st.error(f"Error loading main.css: {e}")
+
+# Inject overrides to hide Streamlit UI wrappers and align layout
 render_html("""
 <style>
 /* Hide standard Streamlit header, footer, and default sidebars */
@@ -87,21 +101,18 @@ header {visibility: hidden;}
 [data-testid="stHeader"] {display: none;}
 [data-testid="stSidebar"] {display: none;}
 
-/* Body styling */
+/* Adjust Streamlit layout container to match main.css background */
 .stApp {
     background-color: #fafafa !important;
     color: #333333 !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
-
-/* Central container adjustment */
 .main .block-container {
-    padding-top: 0rem !important;
+    padding-top: 1rem !important;
     padding-left: 2rem !important;
     padding-right: 2rem !important;
 }
 
-/* Navbar container */
+/* Custom Navbar container matches .bg-steel styling from main.css */
 .navbar-custom {
     background-color: #5f788a;
     padding: 12px 24px;
@@ -134,54 +145,7 @@ header {visibility: hidden;}
     text-decoration: none;
 }
 
-/* Content box / Section card */
-.content-section {
-    background: #ffffff;
-    padding: 20px;
-    border: 1px solid #dddddd;
-    border-radius: 3px;
-    margin-bottom: 20px;
-    color: #333333;
-}
-
-/* Heading styles */
-h1, h2, h3, h4, h5, h6 {
-    color: #444444 !important;
-    font-weight: 500;
-}
-
-/* Article inside feed styling */
-.article-title {
-    color: #444444;
-    text-decoration: none;
-}
-a.article-title:hover {
-    color: #428bca !important;
-    text-decoration: none;
-}
-.article-img {
-    height: 65px;
-    width: 65px;
-    margin-right: 16px;
-    border-radius: 50%;
-}
-.article-metadata {
-    padding-bottom: 1px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #e3e3e3;
-    font-size: 0.9rem;
-}
-.article-metadata a {
-    color: #007bff;
-    text-decoration: none;
-    font-weight: bold;
-}
-.article-metadata a:hover {
-    color: #0056b3;
-    text-decoration: underline;
-}
-
-/* Streamlit forms container customization */
+/* Streamlit form card customization */
 div[data-testid="stForm"] {
     background-color: #ffffff !important;
     border: 1px solid #dddddd !important;
