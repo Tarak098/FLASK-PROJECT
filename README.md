@@ -1,31 +1,43 @@
-# Flask Blog Application
+# Flask Blog Application (with Streamlit & Flask Interfaces)
 
-A fully-featured blogging platform built with Python using the Flask micro-framework, SQLite/PostgreSQL databases, and Docker containerization.
+A fully-featured blogging platform built with Python. This project co-exists with two web interfaces: a traditional **Flask web app** (using HTML/CSS templates) and a modern **Streamlit dashboard** (ideal for immediate cloud deployment on Streamlit Community Cloud). Both interfaces share the same SQLite database (`instance/site.db`).
 
 ## Features
 
-- **User Authentication**: Secure registration, login, logout, and password hashing (using Flask-Bcrypt).
+- **User Authentication**: Secure registration, login, logout, and password hashing (using Bcrypt) across both Flask and Streamlit.
 - **Post Management**: Create, read, update, and delete blog posts.
 - **User Profiles**: Custom profile pictures (automatic cropping and resizing using Pillow) and profile updates.
-- **Pagination**: Interactive pagination for navigating home posts and user-specific posts.
-- **Password Reset**: Secure token-based password reset links emailed to users (using `itsdangerous` tokens and Gmail SMTP integration).
-- **Deployment Ready**: Fully configured for containerized deployments with a production-ready `Dockerfile` and Gunicorn WSGI server.
+- **Pagination**: Interactive pagination for navigating blog posts.
+- **Password Reset**: Secure token-based password reset links emailed to users (using Gmail SMTP integration on Flask).
+- **Deployment Ready**: Standard Docker configurations for production, plus immediate support for Streamlit Community Cloud deployment.
 
 ---
 
-## Local Setup
+## 1. Streamlit Interface (Recommended for Quick Cloud Hosting)
 
-### 1. Prerequisites
-- Python 3.11 or newer
+Streamlit is the easiest way to run and deploy this application in the cloud for free.
 
-### 2. Installation
-Clone the repository (if not already done) and enter the directory:
+### Run Streamlit Locally
+Activate your virtual environment and run:
 ```bash
-git clone https://github.com/Tarak098/FLASK-PROJECT.git
-cd FLASK-PROJECT
+streamlit run streamlit_app.py
 ```
+This opens the web app automatically at `http://localhost:8501`.
 
-Create a virtual environment and activate it:
+### Deploying to Streamlit Community Cloud (Free)
+1. Push your code to GitHub.
+2. Sign in to **[Streamlit Community Cloud](https://share.streamlit.io/)** using your GitHub account.
+3. Click **New app** -> Select your **FLASK-PROJECT** repository.
+4. Set the **Main file path** to `streamlit_app.py`.
+5. Click **Deploy**. Your app will be live on a public URL in seconds!
+
+---
+
+## 2. Flask Interface (Traditional Web App)
+
+### Run Flask Locally
+
+Create a virtual environment, activate it, and install dependencies:
 ```bash
 # Windows
 python -m venv venv
@@ -34,36 +46,27 @@ python -m venv venv
 # macOS / Linux
 python3 -m venv venv
 source venv/bin/activate
-```
 
-Install the dependencies:
-```bash
 pip install -r requirements.txt
 ```
 
-### 3. Environment Configuration
 Copy the template configuration file:
 ```bash
 cp .env.example .env
 ```
-Open `.env` and fill in your details:
-- `SECRET_KEY`: Set a secure secret key for session signing.
-- `DATABASE_URL`: Set a database URI (leave blank to default to SQLite `site.db`).
-- `EMAIL_USER`: Your Gmail address (required for password resets).
-- `EMAIL_PASS`: Your Gmail App Password (required for password resets).
+Open `.env` and fill in your details (`SECRET_KEY`, `EMAIL_USER`, `EMAIL_PASS`).
 
-### 4. Running the Application
 Start the Flask development server:
 ```bash
 python run.py
 ```
-Open your browser and navigate to `http://127.0.0.1:5000`. The database will be created automatically on launch.
+Access the application at `http://127.0.0.1:5000`.
 
 ---
 
-## Running with Docker
+## 3. Running with Docker (Flask App)
 
-You can build and run the application inside a container locally:
+You can build and run the Flask application inside a container locally:
 
 1. **Build the Docker Image**:
    ```bash
@@ -78,19 +81,11 @@ The app will be accessible at `http://localhost:8000`.
 
 ---
 
-## Production Deployment (e.g. on Render)
+## 4. Production Deployment for Flask (e.g. on Render)
 
-### 1. Database Setup
-Since SQLite files are temporary on free hosting providers (e.g., Render, Railway), it is recommended to provision a PostgreSQL database:
+If deploying the Flask version to Render:
 1. Create a PostgreSQL Database on Render.
-2. Copy the **External Database URL**.
-
-### 2. Web Service Setup
-1. Create a new **Web Service** on Render and link your GitHub repository.
-2. Select **Docker** as the Runtime.
-3. Add the following Environment Variables in the Render dashboard:
-   - `DATABASE_URL` = *(Your PostgreSQL Database connection URL)*
-   - `SECRET_KEY` = *(A secure random string)*
-   - `EMAIL_USER` = *(Your Gmail address)*
-   - `EMAIL_PASS` = *(Your Google App Password)*
-4. Click **Deploy**. Render will automatically pull the code, compile the Docker container, run migrations, and publish the app!
+2. Create a new **Web Service** on Render, linking your GitHub repository.
+3. Select **Docker** as the Runtime.
+4. Set environment variables `DATABASE_URL` (your PostgreSQL connection string), `SECRET_KEY`, `EMAIL_USER`, and `EMAIL_PASS`.
+5. Deploy.
