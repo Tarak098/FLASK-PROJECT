@@ -81,14 +81,17 @@ def user_posts(username):
 def reset_request():
     if current_user.is_authenticated:
         return redirect(url_for("main.home"))
-    form=RequestResetForm()
+    form = RequestResetForm()
     if form.validate_on_submit():
-        user=User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
         if send_reset_email(user):
-            flash("An email has been sent to you with instructions to reset your password", "info")
+            flash("An email has been sent to you with instructions to reset your password.", "info")
+            return redirect(url_for("users.login"))
         else:
-            flash("Unable to send password reset email. Please verify configuration or try again later.", "warning")
-        return redirect(url_for("users.login"))
+            token = user.get_reset_token()
+            reset_url = url_for("users.reset_password", token=token, _external=True)
+            flash("Outbound SMTP mail is restricted on Render network. You can reset your password using the link below:", "warning")
+            return render_template("reset_request.html", title="Reset Request", form=form, reset_url=reset_url)
     return render_template("reset_request.html", title="Reset Request", form=form)
 
 
