@@ -46,7 +46,7 @@ def send_reset_email(user):
         print(f"[Email Diagnostics] Sending email via user='{mail_user}', pass_prefix='{clean_pass[:8]}...', pass_len={len(clean_pass)}")
 
         # 1. Try Brevo HTTP API over Port 443 (Never blocked by Render firewall)
-        if clean_pass.startswith("xkeysib-") or "brevo" in str(current_app.config.get("MAIL_SERVER", "")).lower():
+        if clean_pass.startswith("xsmtpsib-") or clean_pass.startswith("xkeysib-") or "brevo" in str(current_app.config.get("MAIL_SERVER", "")).lower() or len(clean_pass) > 50:
             url = "https://api.brevo.com/v3/smtp/email"
             payload = {
                 "sender": {"email": mail_user, "name": "Flask Blog"},
