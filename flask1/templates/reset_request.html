@@ -23,12 +23,5 @@
 			   {{ form.submit(class="btn btn-outline-info") }}
 			</div>
 		</form>   
-		{% if reset_url %}
-			<div class="mt-4 p-3 bg-light border rounded">
-				<h5>Direct Password Reset Link:</h5>
-				<p class="mb-2 text-muted">Because outbound SMTP ports are restricted on Render's network, click the button below to reset your password:</p>
-				<a href="{{ reset_url }}" class="btn btn-success font-weight-bold">Reset Password Now</a>
-			</div>
-		{% endif %}
 	</div>
 {% endblock content %}

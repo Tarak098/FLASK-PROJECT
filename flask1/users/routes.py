@@ -86,12 +86,9 @@ def reset_request():
         user = User.query.filter_by(email=form.email.data).first()
         if send_reset_email(user):
             flash("An email has been sent to you with instructions to reset your password.", "info")
-            return redirect(url_for("users.login"))
         else:
-            token = user.get_reset_token()
-            reset_url = url_for("users.reset_password", token=token, _external=True)
-            flash("Outbound SMTP mail is restricted on Render network. You can reset your password using the link below:", "warning")
-            return render_template("reset_request.html", title="Reset Request", form=form, reset_url=reset_url)
+            flash("Unable to send password reset email. Please verify network configuration or try again later.", "warning")
+        return redirect(url_for("users.login"))
     return render_template("reset_request.html", title="Reset Request", form=form)
 
 
