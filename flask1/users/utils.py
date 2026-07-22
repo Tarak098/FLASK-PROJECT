@@ -49,8 +49,8 @@ If you did not make this request, simply ignore this email and no changes will b
             print("[SMTP Log] EMAIL_USER or EMAIL_PASS not set in environment variables.")
             return False
 
-        # Clean spaces if any in app password
-        clean_pass = mail_pass.strip()
+        # Clean spaces if any in app password (Gmail app passwords are 16 contiguous chars)
+        clean_pass = mail_pass.replace(" ", "").strip()
 
         msg["From"] = mail_user
         msg["To"] = f"{user.email}"
