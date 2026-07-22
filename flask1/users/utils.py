@@ -30,29 +30,49 @@ def save_picture(form_picture):
 
 def send_reset_email(user):
     try:
-        token=user.get_reset_token()
-        msg = MIMEText(f"""To reset your password click the following link:
-{url_for("users.reset_password", token=token, _external=True)}
-If you did not make this request then simply ignore this email and no changes will be made
+        token = user.get_reset_token()
+        reset_url = url_for("users.reset_password", token=token, _external=True)
+        
+        msg = MIMEText(f"""To reset your password, click the following link:
+{reset_url}
+
+If you did not make this request, simply ignore this email and no changes will be made.
 """)
         msg["Subject"] = "Password Reset Request"
         
         mail_user = current_app.config.get("MAIL_USERNAME")
         mail_pass = current_app.config.get("MAIL_PASSWORD")
-        mail_server = current_app.config.get("MAIL_SERVER")
-        mail_port = current_app.config.get("MAIL_PORT")
+        mail_server = current_app.config.get("MAIL_SERVER", "smtp.gmail.com")
+        mail_port = int(current_app.config.get("MAIL_PORT", 587))
         
         if not mail_user or not mail_pass:
-            print("SMTP Credentials not set.")
+            print("[SMTP Log] EMAIL_USER or EMAIL_PASS not set in environment variables.")
             return False
 
+        # Clean spaces if any in app password
+        clean_pass = mail_pass.strip()
+
         msg["From"] = mail_user
-        server = smtplib.SMTP(mail_server, mail_port, timeout=5)
-        server.starttls()
-        server.login(mail_user, mail_pass)
-        server.sendmail(mail_user, f"{user.email}", msg.as_string())
+        msg["To"] = f"{user.email}"
+
+        # Try connection with SSL on port 465 or STARTTLS on port 587
+        if mail_port == 465:
+            server = smtplib.SMTP_SSL(mail_server, 465, timeout=10)
+            server.login(mail_user, clean_pass)
+        else:
+            try:
+                server = smtplib.SMTP(mail_server, mail_port, timeout=10)
+                server.starttls()
+                server.login(mail_user, clean_pass)
+            except Exception as e1:
+                print(f"[SMTP Warning] STARTTLS port {mail_port} failed: {e1}. Trying SSL port 465...")
+                server = smtplib.SMTP_SSL(mail_server, 465, timeout=10)
+                server.login(mail_user, clean_pass)
+
+        server.sendmail(mail_user, [user.email], msg.as_string())
         server.quit()
+        print(f"[SMTP Success] Password reset email sent to {user.email}")
         return True
     except Exception as e:
-        print(f"SMTP Error: {e}")
+        print(f"[SMTP Error] Failed to send email: {e}")
         return False
