@@ -28,33 +28,58 @@ def save_picture(form_picture):
 
 
 
+import requests
+
 def send_reset_email(user):
     try:
         token = user.get_reset_token()
         reset_url = url_for("users.reset_password", token=token, _external=True)
         
+        mail_user = current_app.config.get("MAIL_USERNAME")
+        mail_pass = current_app.config.get("MAIL_PASSWORD")
+        
+        if not mail_user or not mail_pass:
+            print("[Email Log] EMAIL_USER or EMAIL_PASS not set in environment variables.")
+            return False
+
+        clean_pass = mail_pass.strip()
+
+        # 1. Try Brevo HTTP API over Port 443 (Never blocked by Render firewall)
+        if clean_pass.startswith("xkeysib-") or "brevo" in str(current_app.config.get("MAIL_SERVER", "")).lower():
+            url = "https://api.brevo.com/v3/smtp/email"
+            payload = {
+                "sender": {"email": mail_user, "name": "Flask Blog"},
+                "to": [{"email": user.email}],
+                "subject": "Password Reset Request",
+                "htmlContent": f"""<p>To reset your password, click the link below:</p>
+<p><a href="{reset_url}">{reset_url}</a></p>
+<p>If you did not make this request, please ignore this email.</p>"""
+            }
+            headers = {
+                "accept": "application/json",
+                "api-key": clean_pass,
+                "content-type": "application/json"
+            }
+            resp = requests.post(url, json=payload, headers=headers, timeout=10)
+            if resp.status_code in [200, 201, 202]:
+                print(f"[Brevo API Success] Password reset email sent to {user.email}: {resp.text}")
+                return True
+            else:
+                print(f"[Brevo API Warning] Status {resp.status_code}: {resp.text}. Trying SMTP fallback...")
+
+        # 2. Fallback to standard SMTP for local testing
         msg = MIMEText(f"""To reset your password, click the following link:
 {reset_url}
 
 If you did not make this request, simply ignore this email and no changes will be made.
 """)
         msg["Subject"] = "Password Reset Request"
-        
-        mail_user = current_app.config.get("MAIL_USERNAME")
-        mail_pass = current_app.config.get("MAIL_PASSWORD")
-        mail_server = current_app.config.get("MAIL_SERVER", "smtp-relay.brevo.com")
-        mail_port = int(current_app.config.get("MAIL_PORT", 587))
-        
-        if not mail_user or not mail_pass:
-            print("[SMTP Log] EMAIL_USER or EMAIL_PASS not set in environment variables.")
-            return False
-
-        clean_pass = mail_pass.strip()
-
         msg["From"] = mail_user
         msg["To"] = f"{user.email}"
 
-        # Try connection with SSL on port 465 or STARTTLS on port 587
+        mail_server = current_app.config.get("MAIL_SERVER", "smtp-relay.brevo.com")
+        mail_port = int(current_app.config.get("MAIL_PORT", 587))
+
         if mail_port == 465:
             server = smtplib.SMTP_SSL(mail_server, 465, timeout=10)
             server.login(mail_user, clean_pass)
