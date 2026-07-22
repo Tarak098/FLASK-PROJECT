@@ -28,29 +28,11 @@ def save_picture(form_picture):
 
 
 
-import resend
-
 def send_reset_email(user):
     try:
         token = user.get_reset_token()
         reset_url = url_for("users.reset_password", token=token, _external=True)
         
-        # Check if Resend API key is configured
-        resend_api_key = os.environ.get("RESEND_API_KEY")
-        if resend_api_key:
-            resend.api_key = resend_api_key.strip()
-            r = resend.Emails.send({
-                "from": "onboarding@resend.dev",
-                "to": user.email,
-                "subject": "Password Reset Request",
-                "html": f"""<p>To reset your password, click the link below:</p>
-<p><a href="{reset_url}">{reset_url}</a></p>
-<p>If you did not make this request, please ignore this email.</p>"""
-            })
-            print(f"[Resend Success] Password reset email sent to {user.email}: {r}")
-            return True
-
-        # Fallback to standard SMTP if RESEND_API_KEY is not set
         msg = MIMEText(f"""To reset your password, click the following link:
 {reset_url}
 
@@ -60,15 +42,14 @@ If you did not make this request, simply ignore this email and no changes will b
         
         mail_user = current_app.config.get("MAIL_USERNAME")
         mail_pass = current_app.config.get("MAIL_PASSWORD")
-        mail_server = current_app.config.get("MAIL_SERVER", "smtp.gmail.com")
+        mail_server = current_app.config.get("MAIL_SERVER", "smtp-relay.brevo.com")
         mail_port = int(current_app.config.get("MAIL_PORT", 587))
         
         if not mail_user or not mail_pass:
             print("[SMTP Log] EMAIL_USER or EMAIL_PASS not set in environment variables.")
             return False
 
-        # Clean spaces if any in app password (Gmail app passwords are 16 contiguous chars)
-        clean_pass = mail_pass.replace(" ", "").strip()
+        clean_pass = mail_pass.strip()
 
         msg["From"] = mail_user
         msg["To"] = f"{user.email}"
