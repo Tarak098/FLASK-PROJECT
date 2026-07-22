@@ -47,9 +47,7 @@ If you did not make this request then simply ignore this email and no changes wi
             return False
 
         msg["From"] = mail_user
-        msg["To"] = f"{user.email}"
-
-        server = smtplib.SMTP(mail_server, mail_port)
+        server = smtplib.SMTP(mail_server, mail_port, timeout=5)
         server.starttls()
         server.login(mail_user, mail_pass)
         server.sendmail(mail_user, f"{user.email}", msg.as_string())
