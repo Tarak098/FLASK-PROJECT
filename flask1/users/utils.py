@@ -35,8 +35,8 @@ def send_reset_email(user):
         token = user.get_reset_token()
         reset_url = url_for("users.reset_password", token=token, _external=True)
         
-        mail_user = current_app.config.get("MAIL_USERNAME")
-        mail_pass = current_app.config.get("MAIL_PASSWORD")
+        mail_user = current_app.config.get("MAIL_USERNAME") or os.environ.get("EMAIL_USER") or os.environ.get("MAIL_USERNAME")
+        mail_pass = current_app.config.get("MAIL_PASSWORD") or os.environ.get("EMAIL_PASS") or os.environ.get("MAIL_PASSWORD")
         
         if not mail_user or not mail_pass:
             print("[Email Log] EMAIL_USER or EMAIL_PASS not set in environment variables.")
