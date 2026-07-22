@@ -39,10 +39,11 @@ def send_reset_email(user):
         mail_pass = current_app.config.get("MAIL_PASSWORD") or os.environ.get("EMAIL_PASS") or os.environ.get("MAIL_PASSWORD")
         
         if not mail_user or not mail_pass:
-            print("[Email Log] EMAIL_USER or EMAIL_PASS not set in environment variables.")
+            print(f"[Email Log Error] EMAIL_USER={mail_user}, EMAIL_PASS_SET={bool(mail_pass)}. Missing credentials.")
             return False
 
         clean_pass = mail_pass.strip()
+        print(f"[Email Diagnostics] Sending email via user='{mail_user}', pass_prefix='{clean_pass[:8]}...', pass_len={len(clean_pass)}")
 
         # 1. Try Brevo HTTP API over Port 443 (Never blocked by Render firewall)
         if clean_pass.startswith("xkeysib-") or "brevo" in str(current_app.config.get("MAIL_SERVER", "")).lower():
@@ -61,8 +62,8 @@ def send_reset_email(user):
                 "content-type": "application/json"
             }
             resp = requests.post(url, json=payload, headers=headers, timeout=10)
+            print(f"[Brevo API Response] Status {resp.status_code}: {resp.text}")
             if resp.status_code in [200, 201, 202]:
-                print(f"[Brevo API Success] Password reset email sent to {user.email}: {resp.text}")
                 return True
             else:
                 print(f"[Brevo API Warning] Status {resp.status_code}: {resp.text}. Trying SMTP fallback...")
