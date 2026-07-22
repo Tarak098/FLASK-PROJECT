@@ -54,7 +54,8 @@ def send_reset_email(user):
                 "subject": "Password Reset Request",
                 "htmlContent": f"""<p>To reset your password, click the link below:</p>
 <p><a href="{reset_url}">{reset_url}</a></p>
-<p>If you did not make this request, please ignore this email.</p>"""
+<p>If you did not make this request, please ignore this email.</p>
+<p><small style="color: #6c757d;">Note: If you don't see this email in your Inbox, please check your Spam, Junk, or Trash folder.</small></p>"""
             }
             headers = {
                 "accept": "application/json",

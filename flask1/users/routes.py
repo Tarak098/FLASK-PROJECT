@@ -85,7 +85,7 @@ def reset_request():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if send_reset_email(user):
-            flash("An email has been sent to you with instructions to reset your password.", "info")
+            flash("An email has been sent to you with instructions to reset your password. (Please check your Spam, Junk, or Trash folder if you don't see it in your Inbox)", "info")
         else:
             flash("Unable to send password reset email. Please verify network configuration or try again later.", "warning")
         return redirect(url_for("users.login"))
