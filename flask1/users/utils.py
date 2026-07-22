@@ -28,11 +28,29 @@ def save_picture(form_picture):
 
 
 
+import resend
+
 def send_reset_email(user):
     try:
         token = user.get_reset_token()
         reset_url = url_for("users.reset_password", token=token, _external=True)
         
+        # Check if Resend API key is configured
+        resend_api_key = os.environ.get("RESEND_API_KEY")
+        if resend_api_key:
+            resend.api_key = resend_api_key.strip()
+            r = resend.Emails.send({
+                "from": "onboarding@resend.dev",
+                "to": user.email,
+                "subject": "Password Reset Request",
+                "html": f"""<p>To reset your password, click the link below:</p>
+<p><a href="{reset_url}">{reset_url}</a></p>
+<p>If you did not make this request, please ignore this email.</p>"""
+            })
+            print(f"[Resend Success] Password reset email sent to {user.email}: {r}")
+            return True
+
+        # Fallback to standard SMTP if RESEND_API_KEY is not set
         msg = MIMEText(f"""To reset your password, click the following link:
 {reset_url}
 
@@ -74,5 +92,5 @@ If you did not make this request, simply ignore this email and no changes will b
         print(f"[SMTP Success] Password reset email sent to {user.email}")
         return True
     except Exception as e:
-        print(f"[SMTP Error] Failed to send email: {e}")
+        print(f"[Email Error] Failed to send password reset email: {e}")
         return False

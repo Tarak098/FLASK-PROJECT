@@ -10,3 +10,4 @@ itsdangerous
 python-dotenv
 gunicorn
 email-validator
+resend
